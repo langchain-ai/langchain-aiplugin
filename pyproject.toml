@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "langchain-plugin"
+version = "0.1.0"
+description = "An example ChatGPT Plugin that exposes a LangChain chain, agent, or retriever"
+authors = ["LangChain Core"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.scripts]
+app = "app.main:start"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.21.1"
+fastapi = "^0.95.0"
+langchain = "^0.0.126"
+openai = "^0.27.2"
+faiss-cpu = "^1.7"
+
+[tool.poetry.group.dev.dependencies]
+black = { version="^23.1.0", extras=["jupyter"] }
+ruff = "^0.0.255"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

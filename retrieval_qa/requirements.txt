@@ -1,0 +1,3 @@
+langchain
+faiss-cpu
+lxml
