@@ -2,7 +2,7 @@
 
 ## Introduction
 
-LangChain can flexibly integrate with the ChatGPT AI plugin ecosystem.
+[LangChain](https://python.langchain.com/en/latest/index.html) can flexibly integrate with the ChatGPT AI plugin ecosystem.
  
 LangChain chains and agents can themselves be deployed as a plugin that can communicate with other agents or with ChatGPT itself.
 
