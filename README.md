@@ -93,6 +93,108 @@ To help get started we've set up two examples.
 
 
 
+### Deploying to Fly.io
+
+We have included a `make` command to deploy your app to Fly.io using their CLI. To run, type
+
+```
+make deploy_to_flyctl
+```
+
+and select NOT to deploy right now (as we include deployment in subsequent steps).
+
+That's it! 
+
+**Manual deployment on Fly.io** 
+
+What follows is an explanation of what goes on within the `make` command, should you wish to do the deployment manually.
+
+
+
+To deploy the Docker container from this repository to Fly.io, follow
+these steps:
+
+[Install Docker](https://docs.docker.com/engine/install/) on your local machine if it is not already installed.
+
+Install the [Fly.io CLI](https://fly.io/docs/getting-started/installing-flyctl/) on your local machine.
+
+Clone the repository from GitHub:
+
+```
+git clone https://github.com/openai/chatgpt-retrieval-plugin.git
+```
+
+Navigate to the cloned repository directory:
+
+```
+cd path/to/chatgpt-retrieval-plugin
+```
+
+Log in to the Fly.io CLI:
+
+```
+flyctl auth login
+```
+
+Create and launch your Fly.io app:
+
+```
+flyctl launch
+```
+
+Follow the instructions in your terminal:
+
+- Choose your app name
+- Choose your app region
+- Don't add any databases
+- Don't deploy yet (if you do, the first deploy might fail as the environment variables are not yet set)
+
+Set the required environment variables (*assuming $OPEN_API_KEY is set locally*):
+
+
+```
+export LANGCHAIN_DIRECTORY_PATH="agent" # or retrieval_qa
+export OPENAI_API_KEY=<your key> # Or whatever auth is required for the selected LLM
+export PLUGIN_BEARER_TOKEN="" # The bearer token you'll assign to your app
+<Add additional environment variables here>
+flyctl secrets set OPENAI_AI_KEY=$OPENAI_API_KEY \
+   LANGCHAIN_DIRECTORY_PATH=$LANGCHAIN_DIRECTORY_PATH \
+   BEARER_TOKEN=$PLUGIN_BEARER_TOKEN \
+   PUBLIC_API_URL=https://$(flyctl status | awk '/Hostname/ {print $3}')
+```
+
+Alternatively, you could set environment variables in the [Fly.io Console](https://fly.io/dashboard).
+
+At this point, you can change the plugin url in your plugin manifest file [here](/.well-known/ai-plugin.json), and in your OpenAPI schema [here](/.well-known/openapi.yaml) to the url for your Fly.io app, which will be `https://your-app-name.fly.dev`.
+
+Deploy your app with:
+
+```
+flyctl deploy
+```
+
+After completing these steps, your Docker container should be deployed to Fly.io and running with the necessary environment variables set. You can view your app by running:
+
+```
+flyctl open
+```
+
+which will open your app url. You should be able to find the OpenAPI schema at `<your_app_url>/.well-known/openapi.yaml` and the manifest at `<your_app_url>/.well-known/ai-plugin.json`.
+
+To view your app logs:
+
+```
+flyctl logs
+```
+
+Now, make sure you have changed the plugin url in your plugin manifest file [here](/.well-known/ai-plugin.json), and in your OpenAPI schema [here](/.well-known/openapi.yaml), and redeploy with `flyctl deploy`. This url will be `https://<your-app-name>.fly.dev`.
+
+**Debugging tips:**
+Fly.io uses port 8080 by default.
+
+If your app fails to deploy, check if the environment variables are set correctly, and then check if your port is configured correctly. You could also try using the [`-e` flag](https://fly.io/docs/flyctl/launch/) with the `flyctl launch` command to set the environment variables at launch.
+
+<!-- 
 ## Deploying to Modal
 
-Below outlines the steps to deploy the Retrieval QA AI Plugin to [Modal](https://modal.com/docs/guide)
+Below outlines the steps to deploy the Retrieval QA AI Plugin to [Modal](https://modal.com/docs/guide) -->
