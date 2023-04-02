@@ -98,7 +98,7 @@ To help get started we've set up two examples.
 We have included a `make` command to deploy your app to Fly.io using their CLI. To run, type
 
 ```
-make deploy_to_flyctl
+make deploy_to_flyctl BEARER_TOKEN="your-plugin's-bearer-token" OPENAI_API_KEY="your-openai-key"
 ```
 
 and select NOT to deploy right now (as we include deployment in subsequent steps).

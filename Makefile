@@ -15,7 +15,7 @@ endif
 	echo "Don't deploy yet"
 	flyctl secrets set OPENAI_AI_KEY=$$OPENAI_API_KEY \
 		LANGCHAIN_DIRECTORY_PATH=$$LANGCHAIN_DIRECTORY_PATH \
-		BEARER_TOKEN=$$PLUGIN_BEARER_TOKEN \
+		BEARER_TOKEN=$$BEARER_TOKEN \
 		PUBLIC_API_URL=https://$$(flyctl status | awk '/Hostname/ {print $$3}')
 
 	echo "You can track the deployment progress at the admin console: https://fly.io/dashboard"
