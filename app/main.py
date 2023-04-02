@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 DIR_PATH = Path(__file__).parent
 
 # Create a loader for the "constants.py" file.
+REQUIRED_ENV_VARS = [
+    "LANGCHAIN_DIRECTORY_PATH",
+    "BEARER_TOKEN",
+]
 DIRECTORY_PATH = os.environ["LANGCHAIN_DIRECTORY_PATH"]
 loader = SourceFileLoader(
     "_langchain_constants", str(Path(DIRECTORY_PATH) / "constants.py")
@@ -98,15 +102,7 @@ app = FastAPI(
 )
 
 
-@app.post(
-    f"/{CONSTANTS.ENDPOINT_NAME}",
-    response_model=ConversationResponse,
-    description=CONSTANTS.ENDPOINT_DESCRIPTION,
-)
-async def chat(
-    request: ConversationRequest = Body(...),
-):
-    """Generate chain responses."""
+async def arun_chain(request: ConversationRequest = Body(...)) -> ConversationResponse:
     print("Request:", request)
     chain = cast(Chain, _CHAIN)
 
@@ -117,6 +113,7 @@ async def chat(
         # route requests to user-specific chain.
         try:
             result = await chain.acall(chain_input)
+            return await result
         except NotImplementedError:
             # The integrations for certain LLM providers don't yet support async
             # In production, this exception block should be removed.
@@ -125,6 +122,18 @@ async def chat(
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail="Internal Service Error")
+
+
+@app.post(
+    f"/{CONSTANTS.ENDPOINT_NAME}",
+    response_model=ConversationResponse,
+    description=CONSTANTS.ENDPOINT_DESCRIPTION,
+)
+async def chat(
+    request: ConversationRequest = Body(...),
+):
+    """Generate chain responses."""
+    return await arun_chain(request)
 
 
 @app.on_event("startup")

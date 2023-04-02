@@ -90,3 +90,9 @@ To help get started we've set up two examples.
 
 - `retrieval_qa`: Exposes a [RetrievalQA Chain](https://python.langchain.com/en/latest/modules/chains/index_examples/vector_db_qa.html) set up with LangChain Documentation. See the [README](retrieval_qa/README.md) in that folder for more information.
 - `agent`: Exposes a simple agent equipped with a calculator. See the [README](agent/README.md) in that folder for more information.
+
+
+
+## Deploying to Modal
+
+Below outlines the steps to deploy the Retrieval QA AI Plugin to [Modal](https://modal.com/docs/guide)
