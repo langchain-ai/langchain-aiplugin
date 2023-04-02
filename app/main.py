@@ -20,13 +20,28 @@ logger = logging.getLogger(__name__)
 
 ### Load Chain and Constants ###
 DIR_PATH = Path(__file__).parent
-
+# List all files in current directory
+FILES = [f for f in DIR_PATH.iterdir()]
 # Create a loader for the "constants.py" file.
 REQUIRED_ENV_VARS = [
     "LANGCHAIN_DIRECTORY_PATH",
     "BEARER_TOKEN",
 ]
-DIRECTORY_PATH = os.environ["LANGCHAIN_DIRECTORY_PATH"]
+DIRECTORY_PATH = os.environ.get("LANGCHAIN_DIRECTORY_PATH", "")
+if not DIRECTORY_PATH.strip():
+    raise ValueError("LANGCHAIN_DIRECTORY_PATH must be set")
+# Recursively walk DIR_PATH.parent ' s subdirectories and print all files and directories in a tree structure
+def print_tree(root_path: Path, indent: int = 0) -> None:
+    for f in root_path.iterdir():
+        if f.is_file():
+            if ".git" in f.name:
+                continue
+            print(f"\t{' ' * indent} [{f}]")
+        elif f.is_dir():
+            print(f"\t{' ' * indent} [{f}]")
+            print_tree(f, indent + 1)
+
+
 loader = SourceFileLoader(
     "_langchain_constants", str(Path(DIRECTORY_PATH) / "constants.py")
 )
