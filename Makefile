@@ -26,4 +26,3 @@ endif
 	echo "Deploying to flyctl"
 	flyctl deploy
 	open https://fly.io/dashboard
-	open_fly_docs_path

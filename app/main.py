@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import shutil
 from typing import Optional, cast
 import importlib
 from importlib.machinery import SourceFileLoader
@@ -30,17 +31,6 @@ REQUIRED_ENV_VARS = [
 DIRECTORY_PATH = os.environ.get("LANGCHAIN_DIRECTORY_PATH", "")
 if not DIRECTORY_PATH.strip():
     raise ValueError("LANGCHAIN_DIRECTORY_PATH must be set")
-# Recursively walk DIR_PATH.parent ' s subdirectories and print all files and directories in a tree structure
-def print_tree(root_path: Path, indent: int = 0) -> None:
-    for f in root_path.iterdir():
-        if f.is_file():
-            if ".git" in f.name:
-                continue
-            print(f"\t{' ' * indent} [{f}]")
-        elif f.is_dir():
-            print(f"\t{' ' * indent} [{f}]")
-            print_tree(f, indent + 1)
-
 
 loader = SourceFileLoader(
     "_langchain_constants", str(Path(DIRECTORY_PATH) / "constants.py")
@@ -170,10 +160,18 @@ def generate_plugin_docs():
         json.dump(PLUGIN_INFORMATION, f, indent=3)
 
 
+Path(".well-known").mkdir(exist_ok=True)
+app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
+
+
 def start():
     """Start the API server."""
-    generate_plugin_docs()
     # The static files are used by the LLM to infer how to interoperate with the plugin.
     # These are auto-generated from the descriptions provided above and the API schema.
-    app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
-    uvicorn.run("app.main:app", host=API_URL, port=API_PORT, reload=True)
+    try:
+        generate_plugin_docs()
+        uvicorn.run("app.main:app", host=API_URL, port=API_PORT, reload=True)
+    finally:
+        # Remove the generated files
+        shutil.rmtree(".well-known")
+        pass
