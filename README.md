@@ -19,8 +19,7 @@ Follow these steps to quickly set up and run a LangChain AI Plugin:
 5. Create a new virtual environment with Python 3.10: `poetry env use python3.10`
 6. Activate the virtual environment: `poetry shell`
 7. Install app dependencies: `poetry install`
-8. Set up the chain you want to run (see detailed instructions below). For an example, run `export LANGCHAIN_DIRECTORY_PATH=r
-etrieval_qa` and `export OPENAI_API_KEY=...` and `export BEARER_TOKEN=...` (the Bearer Token can be anything you want for local testing purposes).
+8. Set up the chain you want to run (see detailed instructions below). For an example, run `export LANGCHAIN_DIRECTORY_PATH=retrieval_qa` and `export OPENAI_API_KEY=...` and `export BEARER_TOKEN=...` (the Bearer Token can be anything you want for local testing purposes).
 9. Run the API locally: `poetry run app --port 8080`
 10. Access the API documentation at `http://0.0.0.0:8080/docs` and test the API endpoints (make sure to add your bearer token).
 
