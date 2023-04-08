@@ -13,9 +13,11 @@ app = "app.main:start"
 python = "^3.10"
 uvicorn = "^0.21.1"
 fastapi = "^0.95.0"
-langchain = "^0.0.126"
+langchain = "^0.0.129"
 openai = "^0.27.2"
 faiss-cpu = "^1.7"
+lxml = "^4.9.2"
+bs4 = "^0.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = { version="^23.1.0", extras=["jupyter"] }

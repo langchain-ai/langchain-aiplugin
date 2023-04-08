@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import shutil
 from typing import Optional, cast
 import importlib
 from importlib.machinery import SourceFileLoader
@@ -20,9 +21,17 @@ logger = logging.getLogger(__name__)
 
 ### Load Chain and Constants ###
 DIR_PATH = Path(__file__).parent
-
+# List all files in current directory
+FILES = [f for f in DIR_PATH.iterdir()]
 # Create a loader for the "constants.py" file.
-DIRECTORY_PATH = os.environ["LANGCHAIN_DIRECTORY_PATH"]
+REQUIRED_ENV_VARS = [
+    "LANGCHAIN_DIRECTORY_PATH",
+    "BEARER_TOKEN",
+]
+DIRECTORY_PATH = os.environ.get("LANGCHAIN_DIRECTORY_PATH", "")
+if not DIRECTORY_PATH.strip():
+    raise ValueError("LANGCHAIN_DIRECTORY_PATH must be set")
+
 loader = SourceFileLoader(
     "_langchain_constants", str(Path(DIRECTORY_PATH) / "constants.py")
 )
@@ -98,15 +107,7 @@ app = FastAPI(
 )
 
 
-@app.post(
-    f"/{CONSTANTS.ENDPOINT_NAME}",
-    response_model=ConversationResponse,
-    description=CONSTANTS.ENDPOINT_DESCRIPTION,
-)
-async def chat(
-    request: ConversationRequest = Body(...),
-):
-    """Generate chain responses."""
+async def arun_chain(request: ConversationRequest = Body(...)) -> ConversationResponse:
     print("Request:", request)
     chain = cast(Chain, _CHAIN)
 
@@ -117,6 +118,7 @@ async def chat(
         # route requests to user-specific chain.
         try:
             result = await chain.acall(chain_input)
+            return await result
         except NotImplementedError:
             # The integrations for certain LLM providers don't yet support async
             # In production, this exception block should be removed.
@@ -125,6 +127,18 @@ async def chat(
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail="Internal Service Error")
+
+
+@app.post(
+    f"/{CONSTANTS.ENDPOINT_NAME}",
+    response_model=ConversationResponse,
+    description=CONSTANTS.ENDPOINT_DESCRIPTION,
+)
+async def chat(
+    request: ConversationRequest = Body(...),
+):
+    """Generate chain responses."""
+    return await arun_chain(request)
 
 
 @app.on_event("startup")
@@ -146,10 +160,18 @@ def generate_plugin_docs():
         json.dump(PLUGIN_INFORMATION, f, indent=3)
 
 
+Path(".well-known").mkdir(exist_ok=True)
+app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
+
+
 def start():
     """Start the API server."""
-    generate_plugin_docs()
     # The static files are used by the LLM to infer how to interoperate with the plugin.
     # These are auto-generated from the descriptions provided above and the API schema.
-    app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
-    uvicorn.run("app.main:app", host=API_URL, port=API_PORT, reload=True)
+    try:
+        generate_plugin_docs()
+        uvicorn.run("app.main:app", host=API_URL, port=API_PORT, reload=True)
+    finally:
+        # Remove the generated files
+        shutil.rmtree(".well-known")
+        pass
