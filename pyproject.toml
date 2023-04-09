@@ -24,6 +24,10 @@ black = { version="^23.1.0", extras=["jupyter"] }
 ruff = "^0.0.255"
 
 
+
+[tool.poetry.group.modal.dependencies]
+modal-client = "^0.48.1750"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
