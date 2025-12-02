@@ -69,7 +69,7 @@ PLUGIN_INFORMATION = {
         "has_user_authentication": False,
     },
     "logo_url": f"{PUBLIC_API_URL}/.well-known/logo.png",
-    "contact_email": "support@langchain.dev",
+    "contact_info": "support.langchain.com",
     "legal_info_url": f"{PUBLIC_API_URL}/legal",
 }
 
